@@ -34,5 +34,6 @@ Imported MNI School website from the user's Google Drive ZIP. The primary web ar
 - API routes imported for auth, blog, gallery, staff, settings, uploads, notices, and messages.
 - Database schema imported under `lib/db/src/schema` and applied to the development database.
 - The imported `vite.config.ts` was replaced with a Replit-ready config using the assigned `PORT` and `BASE_PATH`.
+- Home page stats are managed through `/api/settings`, including students, teachers, years of excellence, and classes count.
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.

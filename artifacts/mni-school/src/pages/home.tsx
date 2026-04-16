@@ -20,8 +20,9 @@ const defaultSettings: SiteSettings = {
   home_tagline: "ज्ञान, संस्कार और उत्कृष्टता की ओर — एक सशक्त भविष्य की नींव",
   home_tagline_english: "Nurturing minds, building character, and shaping futures for generations.",
   home_stats_students: "1200+",
-  home_stats_teachers: "30+",
-  home_stats_years: "8+",
+  home_stats_teachers: "60+",
+  home_stats_years: "17+",
+  home_stats_classes: "15+",
 };
 
 export default function Home() {
@@ -49,7 +50,7 @@ export default function Home() {
     { icon: GraduationCap, label: "Students", labelHindi: "छात्र", value: settings.home_stats_students || defaultSettings.home_stats_students },
     { icon: Users, label: "Teachers", labelHindi: "शिक्षक", value: settings.home_stats_teachers || defaultSettings.home_stats_teachers },
     { icon: Award, label: "Years of Excellence", labelHindi: "वर्षों की उत्कृष्टता", value: settings.home_stats_years || defaultSettings.home_stats_years },
-    { icon: BookOpen, label: "Courses", labelHindi: "पाठ्यक्रम", value: "15+" },
+    { icon: BookOpen, label: "Classes", labelHindi: "कक्षाएं", value: settings.home_stats_classes || defaultSettings.home_stats_classes },
   ];
 
   return (

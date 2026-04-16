@@ -19,6 +19,7 @@
                 facility_smart_classrooms?: string;
                 facility_hostel?: string;
                 facility_health_room?: string;
+                home_stats_years?: string;
               }
 
               const ALL_FACILITIES = [
@@ -212,7 +213,7 @@
                               )}
                             </div>
                             <div className="absolute -bottom-4 -right-4 bg-primary text-white rounded-xl p-4 shadow-lg">
-                              <div className="text-2xl font-bold">8+</div>
+                              <div className="text-2xl font-bold">{settings.home_stats_years || "17+"}</div>
                               <div className="text-xs">Years of Excellence</div>
                             </div>
                           </div>

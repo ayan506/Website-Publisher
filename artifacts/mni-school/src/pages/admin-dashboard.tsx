@@ -991,10 +991,11 @@ function SettingsManager() {
           <Field label="School Name (English)"><input className={iC} value={settings.home_title ?? ""} onChange={e => set("home_title", e.target.value)} /></Field>
           <Field label="Hindi Tagline (shown in hero)"><textarea className={iC + " resize-none"} rows={2} value={settings.home_tagline ?? ""} onChange={e => set("home_tagline", e.target.value)} /></Field>
           <Field label="English Subtitle"><textarea className={iC + " resize-none"} rows={2} value={settings.home_tagline_english ?? ""} onChange={e => set("home_tagline_english", e.target.value)} /></Field>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Field label="Students Count"><input className={iC} value={settings.home_stats_students ?? ""} onChange={e => set("home_stats_students", e.target.value)} placeholder="1200+" /></Field>
             <Field label="Teachers Count"><input className={iC} value={settings.home_stats_teachers ?? ""} onChange={e => set("home_stats_teachers", e.target.value)} placeholder="60+" /></Field>
-            <Field label="Years of Excellence"><input className={iC} value={settings.home_stats_years ?? ""} onChange={e => set("home_stats_years", e.target.value)} placeholder="25+" /></Field>
+            <Field label="Years of Excellence"><input className={iC} value={settings.home_stats_years ?? ""} onChange={e => set("home_stats_years", e.target.value)} placeholder="17+" /></Field>
+            <Field label="Classes Count"><input className={iC} value={settings.home_stats_classes ?? ""} onChange={e => set("home_stats_classes", e.target.value)} placeholder="15+" /></Field>
           </div>
         </div>
       )}
