@@ -12,10 +12,23 @@ interface Notice {
   createdAt: string;
 }
 
+type SiteSettings = Record<string, string>;
+
+const defaultSettings: SiteSettings = {
+  home_title: "MNI Higher Secondary School",
+  home_title_hindi: "एम.एन.आई. उच्चतर माध्यमिक विद्यालय",
+  home_tagline: "ज्ञान, संस्कार और उत्कृष्टता की ओर — एक सशक्त भविष्य की नींव",
+  home_tagline_english: "Nurturing minds, building character, and shaping futures for generations.",
+  home_stats_students: "1200+",
+  home_stats_teachers: "30+",
+  home_stats_years: "8+",
+};
+
 export default function Home() {
   const { data: posts } = useListBlogPosts();
   const { data: staff } = useListStaff();
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
 
   useEffect(() => {
     fetch("/api/notices/active")
@@ -24,7 +37,20 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(r => r.json())
+      .then(data => setSettings({ ...defaultSettings, ...data }))
+      .catch(() => {});
+  }, []);
+
   const principal = staff?.find(s => s.role.toLowerCase().includes("principal") && !s.role.toLowerCase().includes("vice"));
+  const stats = [
+    { icon: GraduationCap, label: "Students", labelHindi: "छात्र", value: settings.home_stats_students || defaultSettings.home_stats_students },
+    { icon: Users, label: "Teachers", labelHindi: "शिक्षक", value: settings.home_stats_teachers || defaultSettings.home_stats_teachers },
+    { icon: Award, label: "Years of Excellence", labelHindi: "वर्षों की उत्कृष्टता", value: settings.home_stats_years || defaultSettings.home_stats_years },
+    { icon: BookOpen, label: "Courses", labelHindi: "पाठ्यक्रम", value: "15+" },
+  ];
 
   return (
     <div>
@@ -42,16 +68,16 @@ export default function Home() {
               Sambhal, Uttar Pradesh
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight mb-4">
-              MNI Higher Secondary School
+              {settings.home_title || defaultSettings.home_title}
             </h1>
             <p className="text-2xl md:text-3xl font-serif text-primary/90 mb-6">
-              एम.एन.आई. उच्चतर माध्यमिक विद्यालय
+              {settings.home_title_hindi || defaultSettings.home_title_hindi}
             </p>
             <p className="text-base text-white/70 mb-4">
-              Nurturing minds, building character, and shaping futures for generations.
+              {settings.home_tagline_english || defaultSettings.home_tagline_english}
             </p>
             <p className="text-lg text-white/60 mb-10">
-              ज्ञान, संस्कार और उत्कृष्टता की ओर — एक सशक्त भविष्य की नींव
+              {settings.home_tagline || defaultSettings.home_tagline}
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/about">
@@ -82,12 +108,7 @@ export default function Home() {
       <section className="py-14 bg-background">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { icon: GraduationCap, label: "Students", labelHindi: "छात्र", value: "1200+" },
-              { icon: Users, label: "Teachers", labelHindi: "शिक्षक", value: "30+" },
-              { icon: Award, label: "Years of Excellence", labelHindi: "वर्षों की उत्कृष्टता", value: "8+" },
-              { icon: BookOpen, label: "Courses", labelHindi: "पाठ्यक्रम", value: "15+" },
-            ].map((stat, i) => (
+            {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
