@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "MNI School"
+version = "1.0.0"
+id = "artifacts/mni-school"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22405
+
+[services.development]
+run = "pnpm --filter @workspace/mni-school run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mni-school", "run", "build" ]
+publicDir = "artifacts/mni-school/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22405"
+BASE_PATH = "/"

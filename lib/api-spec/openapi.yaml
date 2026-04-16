@@ -3,20 +3,27 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API specification for MNI Higher Secondary School
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: blog
+    description: Blog post operations
+  - name: gallery
+    description: Photo gallery operations
+  - name: staff
+    description: Administrative staff operations
+  - name: auth
+    description: Admin authentication
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +31,279 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: adminLogin
+      tags: [auth]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Unauthorized
+
+  /auth/logout:
+    post:
+      operationId: adminLogout
+      tags: [auth]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getAdminMe
+      tags: [auth]
+      summary: Get current admin session
+      responses:
+        "200":
+          description: Current admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSession"
+        "401":
+          description: Not authenticated
+
+  /blog:
+    get:
+      operationId: listBlogPosts
+      tags: [blog]
+      summary: List all blog posts
+      responses:
+        "200":
+          description: List of blog posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BlogPost"
+    post:
+      operationId: createBlogPost
+      tags: [blog]
+      summary: Create a blog post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBlogPostBody"
+      responses:
+        "201":
+          description: Created blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+
+  /blog/{id}:
+    get:
+      operationId: getBlogPost
+      tags: [blog]
+      summary: Get a blog post by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+    put:
+      operationId: updateBlogPost
+      tags: [blog]
+      summary: Update a blog post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBlogPostBody"
+      responses:
+        "200":
+          description: Updated blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+    delete:
+      operationId: deleteBlogPost
+      tags: [blog]
+      summary: Delete a blog post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /gallery:
+    get:
+      operationId: listGalleryPhotos
+      tags: [gallery]
+      summary: List all gallery photos
+      responses:
+        "200":
+          description: List of gallery photos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GalleryPhoto"
+    post:
+      operationId: createGalleryPhoto
+      tags: [gallery]
+      summary: Add a photo to gallery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGalleryPhotoBody"
+      responses:
+        "201":
+          description: Created gallery photo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryPhoto"
+
+  /gallery/{id}:
+    put:
+      operationId: updateGalleryPhoto
+      tags: [gallery]
+      summary: Update gallery photo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGalleryPhotoBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryPhoto"
+    delete:
+      operationId: deleteGalleryPhoto
+      tags: [gallery]
+      summary: Delete a gallery photo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /staff:
+    get:
+      operationId: listStaff
+      tags: [staff]
+      summary: List all administrative staff
+      responses:
+        "200":
+          description: List of staff
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StaffMember"
+    post:
+      operationId: createStaff
+      tags: [staff]
+      summary: Add a staff member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStaffBody"
+      responses:
+        "201":
+          description: Created staff member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffMember"
+
+  /staff/{id}:
+    put:
+      operationId: updateStaff
+      tags: [staff]
+      summary: Update a staff member
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStaffBody"
+      responses:
+        "200":
+          description: Updated staff member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffMember"
+    delete:
+      operationId: deleteStaff
+      tags: [staff]
+      summary: Delete a staff member
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +314,181 @@ components:
       required:
         - status
 
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    AdminSession:
+      type: object
+      properties:
+        isAdmin:
+          type: boolean
+        username:
+          type: string
+      required:
+        - isAdmin
+
+    BlogPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        titleHindi:
+          type: string
+        content:
+          type: string
+        contentHindi:
+          type: string
+        author:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - title
+        - titleHindi
+        - content
+        - contentHindi
+        - author
+        - createdAt
+        - updatedAt
+
+    CreateBlogPostBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleHindi:
+          type: string
+        content:
+          type: string
+        contentHindi:
+          type: string
+        author:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+      required:
+        - title
+        - titleHindi
+        - content
+        - contentHindi
+        - author
+
+    GalleryPhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        titleHindi:
+          type: string
+        imageUrl:
+          type: string
+        category:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - title
+        - titleHindi
+        - imageUrl
+        - category
+        - createdAt
+
+    CreateGalleryPhotoBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleHindi:
+          type: string
+        imageUrl:
+          type: string
+        category:
+          type: string
+      required:
+        - title
+        - titleHindi
+        - imageUrl
+        - category
+
+    StaffMember:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameHindi:
+          type: string
+        role:
+          type: string
+        roleHindi:
+          type: string
+        photoUrl:
+          type: string
+          nullable: true
+        order:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - nameHindi
+        - role
+        - roleHindi
+        - order
+        - createdAt
+
+    CreateStaffBody:
+      type: object
+      properties:
+        name:
+          type: string
+        nameHindi:
+          type: string
+        role:
+          type: string
+        roleHindi:
+          type: string
+        photoUrl:
+          type: string
+          nullable: true
+        order:
+          type: integer
+      required:
+        - name
+        - nameHindi
+        - role
+        - roleHindi
+        - order
