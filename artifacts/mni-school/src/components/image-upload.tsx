@@ -4,40 +4,57 @@ import { Upload, X, Image as ImageIcon } from "lucide-react";
 interface ImageUploadProps {
   value?: string | null;
   onChange: (url: string) => void;
+  onMultipleChange?: (urls: string[]) => void;
   label?: string;
   className?: string;
+  multiple?: boolean;
 }
 
-export function ImageUpload({ value, onChange, label = "Upload Image", className = "" }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, onMultipleChange, label = "Upload Image", className = "", multiple = false }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFile = async (file: File) => {
+  const uploadFile = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    if (!res.ok) throw new Error("Upload failed");
+    const data = await res.json();
+    return data.url as string;
+  };
+
+  const handleFiles = async (files: FileList | File[]) => {
     setError("");
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Upload failed");
-      const data = await res.json();
-      onChange(data.url);
+      const selectedFiles = Array.from(files);
+      if (selectedFiles.length === 0) return;
+      const uploadedUrls = [];
+      for (const file of selectedFiles) {
+        uploadedUrls.push(await uploadFile(file));
+      }
+      if (multiple) {
+        onMultipleChange?.(uploadedUrls);
+        if (uploadedUrls[0]) onChange(uploadedUrls[0]);
+      } else if (uploadedUrls[0]) {
+        onChange(uploadedUrls[0]);
+      }
     } catch {
       setError("Upload failed. Try again.");
     } finally {
       setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
     }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
   };
 
   return (
@@ -77,7 +94,9 @@ export function ImageUpload({ value, onChange, label = "Upload Image", className
                 <ImageIcon className="w-5 h-5 text-muted-foreground" />
               </div>
               <p className="text-sm font-medium text-foreground">{label}</p>
-              <p className="text-xs text-muted-foreground">Click or drag & drop • JPG, PNG, WebP (max 10MB)</p>
+              <p className="text-xs text-muted-foreground">
+                Click or drag & drop • JPG, PNG, WebP (max 10MB{multiple ? " each" : ""})
+              </p>
             </>
           )}
         </div>
@@ -86,9 +105,10 @@ export function ImageUpload({ value, onChange, label = "Upload Image", className
       <input
         ref={inputRef}
         type="file"
+        multiple={multiple}
         accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
         className="hidden"
-        onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+        onChange={e => { if (e.target.files?.length) handleFiles(e.target.files); }}
       />
     </div>
   );

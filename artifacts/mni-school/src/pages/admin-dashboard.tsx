@@ -198,6 +198,7 @@ function GalleryManager() {
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({ name: "", nameHindi: "", description: "", coverImageUrl: "", eventDate: "" });
   const [photoForm, setPhotoForm] = useState<PhotoForm>({ title: "", titleHindi: "", imageUrl: "", category: "Events", albumId: null });
+  const [photoUploadUrls, setPhotoUploadUrls] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleteAlbumId, setDeleteAlbumId] = useState<number | null>(null);
   const [deletePhotoId, setDeletePhotoId] = useState<number | null>(null);
@@ -218,8 +219,8 @@ function GalleryManager() {
 
   const openAddAlbum = () => { setEditingAlbum(null); setAlbumForm({ name: "", nameHindi: "", description: "", coverImageUrl: "", eventDate: "" }); setShowAlbumForm(true); };
   const openEditAlbum = (a: Album) => { setEditingAlbum(a); setAlbumForm({ name: a.name, nameHindi: a.nameHindi, description: a.description ?? "", coverImageUrl: a.coverImageUrl ?? "", eventDate: a.eventDate ?? "" }); setShowAlbumForm(true); };
-  const openAddPhoto = () => { setEditingPhoto(null); setPhotoForm({ title: "", titleHindi: "", imageUrl: "", category: "Events", albumId: openAlbum?.id ?? null }); setShowPhotoForm(true); };
-  const openEditPhoto = (p: Photo) => { setEditingPhoto(p); setPhotoForm({ title: p.title, titleHindi: p.titleHindi, imageUrl: p.imageUrl, category: p.category, albumId: p.albumId ?? null }); setShowPhotoForm(true); };
+  const openAddPhoto = () => { setEditingPhoto(null); setPhotoForm({ title: "", titleHindi: "", imageUrl: "", category: "Events", albumId: openAlbum?.id ?? null }); setPhotoUploadUrls([]); setShowPhotoForm(true); };
+  const openEditPhoto = (p: Photo) => { setEditingPhoto(p); setPhotoForm({ title: p.title, titleHindi: p.titleHindi, imageUrl: p.imageUrl, category: p.category, albumId: p.albumId ?? null }); setPhotoUploadUrls([p.imageUrl]); setShowPhotoForm(true); };
 
   const submitAlbum = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true);
@@ -236,8 +237,29 @@ function GalleryManager() {
 
   const submitPhoto = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true);
-    const url = editingPhoto ? `/api/gallery/${editingPhoto.id}` : "/api/gallery";
-    await fetch(url, { method: editingPhoto ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(photoForm) });
+    const urls = editingPhoto ? [photoForm.imageUrl] : photoUploadUrls;
+    if (urls.length === 0) {
+      setSaving(false);
+      window.alert("Please upload at least one photo.");
+      return;
+    }
+    if (editingPhoto) {
+      await fetch(`/api/gallery/${editingPhoto.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ ...photoForm, imageUrl: urls[0] }) });
+    } else {
+      await Promise.all(urls.map((imageUrl, index) =>
+        fetch("/api/gallery", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            ...photoForm,
+            imageUrl,
+            title: urls.length > 1 ? `${photoForm.title} ${index + 1}` : photoForm.title,
+            titleHindi: urls.length > 1 ? `${photoForm.titleHindi} ${index + 1}` : photoForm.titleHindi,
+          }),
+        })
+      ));
+    }
     setSaving(false); setShowPhotoForm(false);
     if (openAlbum) loadAlbumPhotos(openAlbum.id);
   };
@@ -352,7 +374,7 @@ function GalleryManager() {
 
       <AnimatePresence>
         {showPhotoForm && (
-          <Modal onClose={() => setShowPhotoForm(false)} title={editingPhoto ? "Edit Photo" : "Add Photo to Album"}>
+          <Modal onClose={() => setShowPhotoForm(false)} title={editingPhoto ? "Edit Photo" : "Add Photos to Album"}>
             <form onSubmit={submitPhoto} className="space-y-4">
               <Field label="Photo Caption (Hindi)" required><input className={iC} value={photoForm.titleHindi} onChange={e => setPhotoForm(p => ({ ...p, titleHindi: e.target.value }))} required placeholder="हिंदी में शीर्षक" /></Field>
               <Field label="Photo Caption (English)" required><input className={iC} value={photoForm.title} onChange={e => setPhotoForm(p => ({ ...p, title: e.target.value }))} required /></Field>
@@ -362,7 +384,36 @@ function GalleryManager() {
                 </select>
               </Field>
               <Field label="Photo" required>
-                <ImageUpload value={photoForm.imageUrl || null} onChange={url => setPhotoForm(p => ({ ...p, imageUrl: url }))} label="Upload photo" />
+                {editingPhoto ? (
+                  <ImageUpload value={photoForm.imageUrl || null} onChange={url => { setPhotoForm(p => ({ ...p, imageUrl: url })); setPhotoUploadUrls(url ? [url] : []); }} label="Upload photo" />
+                ) : (
+                  <div className="space-y-3">
+                    <ImageUpload
+                      value={null}
+                      multiple
+                      onChange={url => setPhotoForm(p => ({ ...p, imageUrl: url }))}
+                      onMultipleChange={urls => setPhotoUploadUrls(prev => [...prev, ...urls])}
+                      label="Upload multiple photos"
+                    />
+                    {photoUploadUrls.length > 0 && (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {photoUploadUrls.map((url, index) => (
+                          <div key={`${url}-${index}`} className="relative aspect-square rounded-lg overflow-hidden border bg-muted">
+                            <img src={url} alt={`Selected ${index + 1}`} className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => setPhotoUploadUrls(prev => prev.filter((_, i) => i !== index))}
+                              className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 hover:bg-black"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">{photoUploadUrls.length} photo{photoUploadUrls.length === 1 ? "" : "s"} selected</p>
+                  </div>
+                )}
               </Field>
               <FormActions onCancel={() => setShowPhotoForm(false)} saving={saving} editMode={!!editingPhoto} />
             </form>
