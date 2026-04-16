@@ -1,8 +1,1 @@
-[build]
-command = "pnpm build"
-publish = "artifacts/mni-school/dist/public"
 
-[[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
