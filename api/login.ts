@@ -1,4 +1,6 @@
-export default function handler(req, res) {
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "POST") {
     const { username, password } = req.body;
 
