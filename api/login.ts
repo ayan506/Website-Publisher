@@ -1,6 +1,4 @@
-import type { Request, Response } from 'express';
-
-export default function handler(req: Request, res: Response) {
+export default function handler(req: any, res: any) {
   if (req.method === "POST") {
     const { username, password } = req.body;
 
